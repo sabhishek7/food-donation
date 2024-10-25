@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Waste Management - Home</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #673AB7;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .container h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .container p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+        .container blockquote {
+            border-left: 4px solid #673AB7;
+            padding-left: 20px;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        .nav-link {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #5C2DB6;
+            transition: background-color 0.3s;
+        }
+        .nav-link:hover {
+            background-color: #4A1E8B;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Welcome to Food Waste Management System</h1>
+    <a href="/" class="nav-link">Donate or Receive food</a>
+
+</header>
+<div class="container">
+    <h1>About Food Waste</h1>
+    <p>Food waste is a significant global issue with environmental, economic, and social impacts. Each year, millions of tons of food are wasted, contributing to greenhouse gas emissions and resource depletion. Reducing food waste can help alleviate hunger, save resources, and mitigate environmental damage.</p>
+    <p>In recent times, the volume of food wasted has increased due to various factors such as supply chain inefficiencies, overproduction, and consumer behavior. Efforts to tackle food waste include improving food distribution, enhancing food recovery programs, and educating the public on sustainable practices.</p>
+    <blockquote>
+        "The greatest threat to our planet is the belief that someone else will save it." - Robert Swan
+    </blockquote>
+</div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Food Waste List for Donor</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            overflow: hidden; /* Prevent scrollbars */
+            position: relative;
+        }
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1; /* Ensure the video stays behind other content */
+        }
+        video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .navbar {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 10px 0;
+        }
+        .navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+        .navbar a.active {
+            background-color: #007bff;
+            border-radius: 5px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            position: relative;
+            z-index: 1; /* Ensure the form appears above the video background */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+<!-- Video Background -->
+<div class="video-container">
+    <video autoplay muted loop>
+        <source th:src="@{/css/video/vd.mp4}" type="video/mp4">
+        <!-- Add additional source tags for other formats (e.g., WebM) if needed -->
+        Your browser does not support the video tag.
+    </video>
+</div>
+<div class="navbar">
+    <a th:href="@{/}" class="active">Home</a>
+    <a th:href="@{/foodwaste/add}">Add New Food Waste</a>
+</div>
+
+<div class="container">
+    <h1>Food Waste List</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Food Type</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Location</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="foodWaste : ${foodWastes}">
+            <td th:text="${foodWaste.id}">1</td>
+            <td th:text="${foodWaste.foodType}">Type</td>
+            <td th:text="${foodWaste.quantity}">10</td>
+            <td th:text="${foodWaste.unit}">kg</td>
+            <td th:text="${foodWaste.location}">Location</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

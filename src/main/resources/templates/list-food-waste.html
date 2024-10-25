@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Food Waste List</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* Prevent scrollbars */
+            position: relative;
+        }
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1; /* Ensure the video stays behind other content */
+        }
+        video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .navbar {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 10px 0;
+        }
+        .navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+        .navbar a.active {
+            background-color: #007bff;
+            border-radius: 5px;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            position: relative;
+            z-index: 1; /* Ensure the content appears above the video background */
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .btn {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="video-container">
+    <video autoplay muted loop>
+        <source th:src="@{/css/video/vd.mp4}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<div class="navbar">
+    <a th:href="@{/}" class="active">Home</a>
+</div>
+
+<div class="container">
+    <h1>Food Waste List</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Food Type</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Location</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="foodWaste : ${foodWastes}">
+            <td th:text="${foodWaste.id}"></td>
+            <td th:text="${foodWaste.foodType}"></td>
+            <td th:text="${foodWaste.quantity}"></td>
+            <td th:text="${foodWaste.unit}"></td>
+            <td th:text="${foodWaste.location}"></td>
+            <td>
+                <a th:href="@{/foodwaste/edit/{id}(id=${foodWaste.id})}" class="btn btn-warning">Edit</a>
+                <a th:href="@{/foodwaste/delete/{id}(id=${foodWaste.id})}" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <a th:href="@{/foodwaste/add}" class="btn btn-primary">Add New Food Waste</a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
