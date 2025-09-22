@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head th:replace="~{fragments/header :: header('Edit Offer')}">
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+</head>
+<body sec:authorize="hasRole('DONOR')">
+<div class="container">
+    <h1>Edit Food Offer</h1>
+    <form th:action="@{/donor/offers/{id}(id=${offer.id})}" th:object="${offer}" method="post" enctype="multipart/form-data">
+        <label>Title: <input type="text" th:field="*{title}" required/></label>
+        <label>Description: <textarea th:field="*{description}" required></textarea></label>
+        <label>Quantity: <input type="text" th:field="*{quantity}" required/></label>
+        <label>Pickup Location: <input type="text" th:field="*{pickupLocation}" required/></label>
+        <label>Latitude: <input type="number" th:field="*{latitude}"/></label>
+        <label>Longitude: <input type="number" th:field="*{longitude}"/></label>
+        <label>Available From: <input type="datetime-local" th:field="*{availableFrom}" required/></label>
+        <label>Expiry: <input type="datetime-local" th:field="*{expiryAt}" required/></label>
+        <label>Tags: <input type="text" th:field="*{tags}"/></label>
+        <label>Add Images: <input type="file" name="images" multiple accept="image/jpeg,image/png"/></label>
+        <!-- TODO: List existing images with delete options -->
+        <button type="submit">Update</button>
+    </form>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Register')}"></head>
+<body>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-header text-center">
+                    <h3><i class="fas fa-user-plus"></i> Join Our Community</h3>
+                    <p class="mb-0 text-light">Create your account to get started</p>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/register}" th:object="${user}" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i> Full Name *
+                                </label>
+                                <input type="text" th:field="*{name}" class="form-control" required placeholder="Enter your full name">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-envelope"></i> Email Address *
+                                </label>
+                                <input type="email" th:field="*{email}" class="form-control" required placeholder="Enter your email">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-lock"></i> Password *
+                            </label>
+                            <input type="password" th:field="*{password}" class="form-control" required placeholder="Create a strong password">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-phone"></i> Phone Number
+                                </label>
+                                <input type="tel" th:field="*{phone}" class="form-control" placeholder="Enter your phone">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-users"></i> Role *
+                                </label>
+                                <select th:field="*{role}" class="form-select" required>
+                                    <option value="">Choose your role</option>
+                                    <option value="ROLE_DONOR">🍽️ Food Donor</option>
+                                    <option value="ROLE_RECEIVER">🏠 Food Receiver</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Address
+                            </label>
+                            <textarea th:field="*{address}" class="form-control" rows="2" placeholder="Enter your address (optional)"></textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-secondary">Already have an account?</p>
+                        <a th:href="@{/login}" class="btn btn-outline-primary">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

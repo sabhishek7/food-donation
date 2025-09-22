@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head th:replace="~{fragments/header :: header('Browse Food Offers')}"></head>
+<body sec:authorize="hasRole('RECEIVER')">
+<!-- Simple Top Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="fas fa-heart me-2"></i>Food Donation
+        </a>
+
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                    <i class="fas fa-user"></i> <span sec:authentication="name">User</span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" th:href="@{/}"><i class="fas fa-home me-2"></i>Home</a></li>
+                    <li><a class="dropdown-item" th:href="@{/offers}"><i class="fas fa-search me-2"></i>Browse Offers</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="text-center mb-4">
+        <h1 class="display-6 text-primary">🍽️ Available Food Offers</h1>
+        <p class="text-muted">Find food donations in your area</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search food offers...">
+        </div>
+        <div class="col-md-2">
+            <select id="tagFilter" class="form-select">
+                <option value="">All Types</option>
+                <option value="vegetarian">Vegetarian</option>
+                <option value="vegan">Vegan</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" onclick="loadOffers()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white text-center">
+                <div class="card-body py-2">
+                    <h4 id="totalOffers">0</h4>
+                    <small>Available</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white text-center">
+                <div class="card-body py-2">
+                    <h4 id="withImages">0</h4>
+                    <small>With Photos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white text-center">
+                <div class="card-body py-2">
+                    <h4 id="expiringToday">0</h4>
+                    <small>Expiring Today</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-end">
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-2">Loading offers...</p>
+    </div>
+
+    <!-- Offers Container -->
+    <div id="offers" class="row g-4"></div>
+
+    <!-- No Offers -->
+    <div id="noOffers" class="text-center py-5 d-none">
+        <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+        <h4>No offers available</h4>
+        <button class="btn btn-primary" onclick="loadOffers()">Refresh</button>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    let offers = [];
+
+    document.addEventListener('DOMContentLoaded', loadOffers);
+    document.getElementById('searchInput').addEventListener('input', filterOffers);
+    document.getElementById('tagFilter').addEventListener('change', filterOffers);
+
+    function loadOffers() {
+        showLoading();
+        fetch('/offers/data')
+            .then(r => r.json())
+            .then(data => {
+                offers = data.rows || data;
+                updateStats();
+                displayOffers(offers);
+                hideLoading();
+            })
+            .catch(() => {
+                document.getElementById('offers').innerHTML =
+                    '<div class="col-12"><div class="alert alert-danger">Error loading offers</div></div>';
+                hideLoading();
+            });
+    }
+
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('offers').style.display = 'none';
+        document.getElementById('noOffers').classList.add('d-none');
+    }
+
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('offers').style.display = 'flex';
+    }
+
+    function updateStats() {
+        document.getElementById('totalOffers').textContent = offers.length;
+        document.getElementById('withImages').textContent = offers.filter(o => o.hasImages).length;
+        document.getElementById('expiringToday').textContent = offers.filter(o =>
+            new Date(o.expiryAt).toDateString() === new Date().toDateString()
+        ).length;
+    }
+
+    function displayOffers(data) {
+        const container = document.getElementById('offers');
+        const noOffers = document.getElementById('noOffers');
+
+        if (data.length === 0) {
+            container.innerHTML = '';
+            noOffers.classList.remove('d-none');
+            return;
+        }
+
+        noOffers.classList.add('d-none');
+        container.innerHTML = data.map(offer => `
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    ${offer.hasImages ? `
+                        <img src="${offer.firstImage}" class="card-img-top"
+                             style="height: 200px; object-fit: cover;">
+                    ` : `
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                             style="height: 200px;">
+                            <i class="fas fa-utensils fa-2x text-muted"></i>
+                        </div>
+                    `}
+
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">${offer.title}</h5>
+                        <p class="card-text small">${offer.description.substring(0, 100)}...</p>
+
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>${offer.donorName}<br>
+                                <i class="fas fa-map-marker-alt me-1"></i>${offer.pickupLocation}<br>
+                                <i class="fas fa-clock me-1"></i>Expires: ${new Date(offer.expiryAt).toLocaleDateString()}
+                            </small>
+                        </div>
+
+                        ${offer.tags ? `
+                            <div class="mb-2">
+                                ${offer.tags.split(',').slice(0, 2).map(tag =>
+                                    `<span class="badge bg-secondary me-1">${tag.trim()}</span>`
+                                ).join('')}
+                            </div>
+                        ` : ''}
+
+                        <a href="/offers/${offer.id}" class="btn btn-primary btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterOffers() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const tag = document.getElementById('tagFilter').value.toLowerCase();
+
+        const filtered = offers.filter(offer => {
+            const matchSearch = !search ||
+                offer.title.toLowerCase().includes(search) ||
+                offer.description.toLowerCase().includes(search) ||
+                offer.donorName.toLowerCase().includes(search);
+
+            const matchTag = !tag || (offer.tags && offer.tags.toLowerCase().includes(tag));
+
+            return matchSearch && matchTag;
+        });
+
+        displayOffers(filtered);
+    }
+</script>
+
+<style>
+    .card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s;
+    }
+</style>
+</body>
+</html>

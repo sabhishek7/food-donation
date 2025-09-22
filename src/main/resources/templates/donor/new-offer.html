@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head th:replace="~{fragments/header :: header('New Offer')}"></head>
+<body sec:authorize="hasRole('DONOR')">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Page Header -->
+            <div class="text-center mb-5">
+                <div class="display-1 text-primary mb-3">🍽️</div>
+                <h1 class="display-5 fw-bold text-primary">Share Your Food</h1>
+                <p class="lead text-secondary">Help reduce food waste by sharing surplus food with those in need</p>
+            </div>
+
+            <!-- Main Form Card -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>Create Food Offer
+                    </h3>
+                    <small class="opacity-75">Fill in the details about your food donation</small>
+                </div>
+
+                <div class="card-body p-4">
+                    <form th:action="@{/donor/offers}" th:object="${offer}" method="post" enctype="multipart/form-data" id="offerForm">
+
+                        <!-- Basic Information Section -->
+                        <div class="mb-4">
+                            <h5 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Basic Information
+                            </h5>
+
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-tag me-1"></i>Food Title *
+                                    </label>
+                                    <input type="text" th:field="*{title}" class="form-control form-control-lg"
+                                           required placeholder="e.g., Fresh Vegetables, Homemade Pasta">
+                                    <div class="form-text">Give your food offer a descriptive title</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-align-left me-1"></i>Description *
+                                </label>
+                                <textarea th:field="*{description}" class="form-control" rows="4" required
+                                          placeholder="Describe the food items, their condition, preparation method, any dietary information..."></textarea>
+                                <div class="form-text">Provide detailed information about the food you're offering</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-balance-scale me-1"></i>Quantity *
+                                    </label>
+                                    <input type="text" th:field="*{quantity}" class="form-control" required
+                                           placeholder="e.g., 5 portions, 2kg, Serves 10 people">
+                                    <div class="form-text">How much food are you offering?</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-tags me-1"></i>Food Tags
+                                    </label>
+                                    <input type="text" th:field="*{tags}" class="form-control"
+                                           placeholder="vegetarian, vegan, gluten-free">
+                                    <div class="form-text">Add dietary tags (comma-separated)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Information Section -->
+                        <div class="mb-4">
+                            <h5 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>Pickup Location
+                            </h5>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-location-arrow me-1"></i>Pickup Address *
+                                </label>
+                                <input type="text" th:field="*{pickupLocation}" class="form-control" required
+                                       placeholder="Enter full address where food can be picked up">
+                                <div class="form-text">Provide a specific address or landmark for pickup</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-globe me-1"></i>Latitude
+                                    </label>
+                                    <input type="number" step="any" th:field="*{latitude}" class="form-control"
+                                           placeholder="e.g., 40.7128">
+                                    <div class="form-text">Optional: GPS coordinates for precise location</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-globe me-1"></i>Longitude
+                                    </label>
+                                    <input type="number" step="any" th:field="*{longitude}" class="form-control"
+                                           placeholder="e.g., -74.0060">
+                                    <div class="form-text">Optional: GPS coordinates for precise location</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timing Information Section -->
+                        <div class="mb-4">
+                            <h5 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-clock me-2"></i>Availability & Timing
+                            </h5>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-calendar-check me-1"></i>Available From *
+                                    </label>
+                                    <input type="datetime-local" th:field="*{availableFrom}" class="form-control" required>
+                                    <div class="form-text">When can people start picking up?</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="fas fa-calendar-times me-1"></i>Best Before *
+                                    </label>
+                                    <input type="datetime-local" th:field="*{expiryAt}" class="form-control" required>
+                                    <div class="form-text">When should the food be consumed by?</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Images Section -->
+                        <div class="mb-4">
+                            <h5 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-images me-2"></i>Food Photos
+                            </h5>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-camera me-1"></i>Upload Images
+                                </label>
+                                <div class="input-group">
+                                    <input type="file" name="images" multiple accept="image/jpeg,image/png,image/jpg"
+                                           class="form-control" id="imageUpload">
+                                    <label class="input-group-text" for="imageUpload">
+                                        <i class="fas fa-upload"></i>
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Upload clear photos of your food (JPEG/PNG, max 5MB each). Good photos help receivers understand what you're offering!
+                                </div>
+                            </div>
+
+                            <!-- Image Preview Area -->
+                            <div id="imagePreview" class="d-none">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-eye me-1"></i>
+                                    <strong>Selected Images:</strong>
+                                    <div id="imageList" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a th:href="@{/donor/offers}" class="btn btn-outline-secondary btn-lg me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-heart me-1"></i>Share Food
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="row mt-5">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-lightbulb fa-2x text-warning mb-3"></i>
+                            <h6>Tips for Good Offers</h6>
+                            <small class="text-muted">Include clear photos, accurate descriptions, and specific pickup times.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-shield-alt fa-2x text-success mb-3"></i>
+                            <h6>Food Safety</h6>
+                            <small class="text-muted">Only share food that's safe to eat and properly stored.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-handshake fa-2x text-primary mb-3"></i>
+                            <h6>Be Responsive</h6>
+                            <small class="text-muted">Reply promptly to pickup requests and coordinate clearly.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Enhanced JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image upload preview
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const imageList = document.getElementById('imageList');
+
+        imageUpload.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                imagePreview.classList.remove('d-none');
+                imageList.innerHTML = '';
+
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    const div = document.createElement('div');
+                    div.className = 'badge bg-secondary me-1 mb-1';
+                    div.innerHTML = `<i class="fas fa-image me-1"></i>${file.name}`;
+                    imageList.appendChild(div);
+                }
+            } else {
+                imagePreview.classList.add('d-none');
+            }
+        });
+
+        // Form validation enhancement
+        const form = document.getElementById('offerForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function() {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Creating Offer...';
+            submitBtn.disabled = true;
+        });
+
+        // Date validation
+        const availableFrom = document.querySelector('input[name="availableFrom"]');
+        const expiryAt = document.querySelector('input[name="expiryAt"]');
+
+        function validateDates() {
+            if (availableFrom.value && expiryAt.value) {
+                const fromDate = new Date(availableFrom.value);
+                const toDate = new Date(expiryAt.value);
+
+                if (fromDate >= toDate) {
+                    expiryAt.setCustomValidity('Expiry date must be after available date');
+                } else {
+                    expiryAt.setCustomValidity('');
+                }
+            }
+        }
+
+        availableFrom.addEventListener('change', validateDates);
+        expiryAt.addEventListener('change', validateDates);
+    });
+</script>
+
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

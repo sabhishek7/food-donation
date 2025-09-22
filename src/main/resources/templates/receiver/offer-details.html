@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head th:replace="~{fragments/header :: header('Offer Details')}"></head>
+<body sec:authorize="hasRole('RECEIVER')">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="fas fa-heart me-2"></i>Food Donation
+        </a>
+        <div class="navbar-nav ms-auto">
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="nav-link btn btn-link text-white">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <!-- Success/Error Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:if="${param.success[0] == 'collected'}">Thank you! You've marked this food as collected.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:if="${param.error[0] == 'collection'}">Unable to mark as collected. The offer may no longer be available.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a th:href="@{/offers}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Offers
+        </a>
+    </div>
+
+    <!-- Offer Details Card -->
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h1 class="card-title mb-0" th:text="${offer.title}">Food Title</h1>
+            <div>
+                <!-- Status Badges -->
+                <span class="badge bg-success fs-6" th:if="${offer.status.name() == 'ACTIVE'}">
+                        <i class="fas fa-check-circle me-1"></i>Available
+                    </span>
+                <span class="badge bg-warning fs-6" th:if="${offer.status.name() == 'COLLECTED'}">
+                        <i class="fas fa-hand-holding me-1"></i>Collected
+                    </span>
+                <span class="badge bg-secondary fs-6" th:if="${offer.status.name() == 'EXPIRED'}">
+                        <i class="fas fa-clock me-1"></i>Expired
+                    </span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Collected Banner -->
+            <div th:if="${offer.status.name() == 'COLLECTED'}" class="alert alert-info mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle fa-2x me-3"></i>
+                    <div>
+                        <h6 class="mb-1">This food has been collected</h6>
+                        <small>
+                            Collected by: <strong th:text="${offer.collectedBy?.name}">Receiver Name</strong>
+                            on <strong th:text="${#temporals.format(offer.collectedAt, 'MMM dd, yyyy HH:mm')}">Date</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <!-- Food Images Gallery -->
+                    <div th:if="${images != null && !images.isEmpty()}" class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-images me-2"></i>Food Photos
+                        </h5>
+
+                        <!-- Main Image -->
+                        <div class="text-center mb-3">
+                            <img id="mainImage" th:src="@{'/images/' + ${offer.id} + '/' + ${images[0].fileName}}"
+                                 class="img-fluid rounded shadow" style="max-height: 400px; cursor: pointer;"
+                                 alt="Food Image" onclick="openLightbox(this.src)">
+                        </div>
+
+                        <!-- Thumbnail Gallery -->
+                        <div th:if="${images.size() > 1}" class="row g-2">
+                            <div th:each="image, iterStat : ${images}" class="col-6 col-md-3">
+                                <img th:src="@{'/images/' + ${offer.id} + '/' + ${image.fileName}}"
+                                     class="img-thumbnail cursor-pointer"
+                                     style="height: 100px; width: 100%; object-fit: cover;"
+                                     onclick="changeMainImage(this.src); openLightbox(this.src);">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">
+                            <i class="fas fa-info-circle me-2"></i>Description
+                        </h5>
+                        <p th:text="${offer.description}" class="text-muted">Food description</p>
+                    </div>
+
+                    <!-- Details Grid -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-balance-scale me-1"></i>Quantity
+                                </h6>
+                                <p th:text="${offer.quantity}" class="mb-0">Quantity info</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Pickup Location
+                                </h6>
+                                <p th:text="${offer.pickupLocation}" class="mb-0">Location</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-clock me-1"></i>Available From
+                                </h6>
+                                <p th:text="${#temporals.format(offer.availableFrom, 'MMM dd, yyyy HH:mm')}" class="mb-0">Date</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="text-primary mb-2">
+                                    <i class="fas fa-calendar-times me-1"></i>Best Before
+                                </h6>
+                                <p th:text="${#temporals.format(offer.expiryAt, 'MMM dd, yyyy HH:mm')}" class="mb-0">Date</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div th:if="${offer.tags != null && !offer.tags.isEmpty()}" class="mb-4">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-tags me-1"></i>Dietary Tags
+                        </h6>
+                        <div th:each="tag : ${offer.tags.split(',')}" class="d-inline-block">
+                            <span class="badge bg-secondary me-1 mb-1" th:text="${tag.trim()}">Tag</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Contact Card -->
+                    <div class="card border-0 bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                                <i class="fas fa-user me-2"></i>Donor Information
+                            </h6>
+                            <p class="mb-1">
+                                <strong th:text="${offer.donor.name}">Donor Name</strong>
+                            </p>
+                            <p class="mb-1 small text-muted" th:if="${offer.donor.phone != null}">
+                                <i class="fas fa-phone me-1"></i><span th:text="${offer.donor.phone}">Phone</span>
+                            </p>
+                            <p class="mb-0 small text-muted">
+                                <i class="fas fa-envelope me-1"></i><span th:text="${offer.donor.email}">Email</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Action Card -->
+                    <div class="card border-0 bg-primary text-white">
+                        <div class="card-body text-center">
+                            <div th:if="${offer.status.name() == 'ACTIVE'}">
+                                <h6 class="card-title">
+                                    <i class="fas fa-hand-holding me-2"></i>Ready to Collect?
+                                </h6>
+                                <p class="small mb-3">Contact the donor to arrange pickup, then mark as collected when you receive the food.</p>
+
+                                <button type="button" class="btn btn-success w-100 mb-2" onclick="confirmCollection()">
+                                    <i class="fas fa-check-circle me-1"></i>Mark as Collected
+                                </button>
+
+                                <!-- Hidden form for collection -->
+                                <form id="collectForm" th:action="@{'/offers/' + ${offer.id} + '/collect'}"
+                                      method="post" style="display: none;">
+                                </form>
+                            </div>
+
+                            <div th:if="${offer.status.name() == 'COLLECTED'}">
+                                <h6 class="card-title">
+                                    <i class="fas fa-check-circle me-2"></i>Already Collected
+                                </h6>
+                                <p class="small mb-0">This food has been collected and is no longer available.</p>
+                            </div>
+
+                            <div th:if="${offer.status.name() == 'EXPIRED'}">
+                                <h6 class="card-title">
+                                    <i class="fas fa-clock me-2"></i>Offer Expired
+                                </h6>
+                                <p class="small mb-0">This offer has passed its expiry time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Collection Confirmation Modal -->
+<div class="modal fade" id="collectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle me-2"></i>Confirm Collection
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-hand-holding-heart fa-4x text-success mb-3"></i>
+                    <h5>Have you received this food?</h5>
+                    <p class="text-muted mb-3">Only mark as collected after you have physically received the food from the donor.</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> This will remove the offer from the public list and other receivers won't be able to see it.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Not Yet
+                </button>
+                <button type="button" class="btn btn-success" onclick="executeCollection()">
+                    <i class="fas fa-check-circle me-1"></i>Yes, I Received It
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox Modal -->
+<div id="imageModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Food Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid" alt="Food Image">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Replace the existing JavaScript section with this: -->
+<!-- Test Bootstrap loading and fix functions -->
+<script>
+    // Test Bootstrap loading with detailed logging
+    console.log('=== Bootstrap Loading Test ===');
+    console.log('jQuery loaded:', typeof $ !== 'undefined');
+    console.log('Bootstrap loaded:', typeof bootstrap !== 'undefined');
+    console.log('Document ready state:', document.readyState);
+
+    // Wait for everything to load
+    window.addEventListener('load', function() {
+        console.log('Window loaded - Bootstrap available:', typeof bootstrap !== 'undefined');
+
+        // If Bootstrap still isn't loaded, try loading it manually
+        if (typeof bootstrap === 'undefined') {
+            console.log('Loading Bootstrap manually...');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
+            script.onload = function() {
+                console.log('Bootstrap loaded manually:', typeof bootstrap !== 'undefined');
+            };
+            document.head.appendChild(script);
+        }
+    });
+
+    // Image gallery functions
+    function changeMainImage(src) {
+        document.getElementById('mainImage').src = src;
+    }
+
+    function openLightbox(src) {
+        document.getElementById('modalImage').src = src;
+
+        // Try multiple methods to show modal
+        if (typeof bootstrap !== 'undefined') {
+            console.log('Using Bootstrap modal');
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            modal.show();
+        } else if (typeof $ !== 'undefined') {
+            console.log('Using jQuery modal');
+            $('#imageModal').modal('show');
+        } else {
+            console.log('Using fallback - direct manipulation');
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'block';
+            modal.classList.add('show');
+            document.body.classList.add('modal-open');
+
+            // Add backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+
+            // Close on backdrop click
+            backdrop.onclick = function() {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                document.body.classList.remove('modal-open');
+                document.body.removeChild(backdrop);
+            };
+        }
+    }
+
+    function confirmCollection() {
+        console.log('confirmCollection called, Bootstrap available:', typeof bootstrap !== 'undefined');
+
+        // Try multiple methods
+        if (typeof bootstrap !== 'undefined') {
+            console.log('Using Bootstrap modal for confirmation');
+            const modal = new bootstrap.Modal(document.getElementById('collectionModal'));
+            modal.show();
+        } else if (typeof $ !== 'undefined') {
+            console.log('Using jQuery modal for confirmation');
+            $('#collectionModal').modal('show');
+        } else {
+            console.log('Using simple confirm dialog');
+            if (confirm('Have you received this food?\n\nThis will:\n- Mark the food as collected\n- Remove it from public listings\n- Notify the donor\n\nClick OK only if you have physically received the food.')) {
+                executeCollection();
+            }
+        }
+    }
+
+    function executeCollection() {
+        console.log('executeCollection called');
+
+        // Show loading state on button if modal exists
+        const collectBtn = document.querySelector('#collectionModal .btn-success');
+        if (collectBtn) {
+            collectBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+            collectBtn.disabled = true;
+
+            // Disable close buttons
+            document.querySelectorAll('#collectionModal .btn-close, #collectionModal .btn-secondary').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        // Submit the form
+        console.log('Submitting collection form');
+        setTimeout(() => {
+            document.getElementById('collectForm').submit();
+        }, 500);
+    }
+
+    // Auto-hide alerts after 5 seconds
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            if (typeof bootstrap !== 'undefined') {
+                try {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                } catch(e) {
+                    alert.style.display = 'none';
+                }
+            } else {
+                alert.style.display = 'none';
+            }
+        });
+    }, 5000);
+</script>
+
+
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .img-thumbnail:hover {
+        transform: scale(1.02);
+        transition: transform 0.2s ease;
+    }
+</style>
+</body>
+</html>

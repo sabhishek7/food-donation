@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/springsecurity">
+<head th:replace="~{fragments/header :: header('My Offer Details')}"></head>
+<body sec:authorize="hasRole('DONOR')">
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="fas fa-heart me-2"></i>Food Donation
+        </a>
+
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                    <i class="fas fa-user"></i> <span sec:authentication="name">Donor</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" th:href="@{/}"><i class="fas fa-home me-2"></i>Home</a></li>
+                    <li><a class="dropdown-item" th:href="@{/donor/offers}"><i class="fas fa-gift me-2"></i>My Offers</a></li>
+                    <li><a class="dropdown-item" th:href="@{/donor/offers/new}"><i class="fas fa-plus me-2"></i>New Offer</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <!-- Success/Error Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:if="${param.success[0] == 'updated'}"><strong>Success!</strong> Your offer has been updated successfully.</span>
+        <span th:if="${param.success[0] == 'deleted'}"><strong>Deleted!</strong> Your offer has been removed from public view.</span>
+        <span th:if="${param.success[0] == 'restored'}"><strong>Restored!</strong> Your offer is now active and visible to receivers.</span>
+        <span th:if="${param.success[0] == 'uncollected'}"><strong>Updated!</strong> Your offer is now marked as uncollected and available again.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:if="${param.error[0] == 'delete'}"><strong>Error!</strong> Unable to delete the offer. Please try again.</span>
+        <span th:if="${param.error[0] == 'unauthorized'}"><strong>Access Denied!</strong> You don't have permission to perform this action.</span>
+        <span th:if="${param.error[0] == 'update'}"><strong>Error!</strong> Unable to update the offer. Please try again.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a th:href="@{/donor/offers}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to My Offers
+        </a>
+    </div>
+
+    <!-- Main Offer Card -->
+    <div class="card shadow-lg border-0">
+        <!-- Card Header with Title and Status -->
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="card-title mb-1" th:text="${offer.title}">Food Title</h1>
+                    <small class="opacity-75">
+                        <i class="fas fa-calendar me-1"></i>Created:
+                        <span th:text="${#temporals.format(offer.createdAt, 'MMM dd, yyyy HH:mm')}">Date</span>
+                    </small>
+                </div>
+                <div>
+                    <!-- Status Badges -->
+                    <span class="badge bg-success fs-6" th:if="${offer.status.name() == 'ACTIVE'}">
+                            <i class="fas fa-check-circle me-1"></i>Active
+                        </span>
+                    <span class="badge bg-info fs-6" th:if="${offer.status.name() == 'COLLECTED'}">
+                            <i class="fas fa-hand-holding me-1"></i>Collected
+                        </span>
+                    <span class="badge bg-warning text-dark fs-6" th:if="${offer.status.name() == 'EXPIRED'}">
+                            <i class="fas fa-clock me-1"></i>Expired
+                        </span>
+                    <span class="badge bg-secondary fs-6" th:if="${offer.status.name() == 'DELETED'}">
+                            <i class="fas fa-trash me-1"></i>Deleted
+                        </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <!-- Collection Success Banner -->
+            <div th:if="${offer.status.name() == 'COLLECTED'}" class="alert alert-success mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-trophy fa-3x text-success me-3"></i>
+                            <div>
+                                <h5 class="mb-1"><strong>🎉 Your food helped someone!</strong></h5>
+                                <div class="mb-2">
+                                    <strong>Collected by:</strong> <span th:text="${offer.collectedBy?.name}">Receiver Name</span><br>
+                                    <strong>Collection Date:</strong> <span th:text="${#temporals.format(offer.collectedAt, 'MMM dd, yyyy HH:mm')}">Date</span>
+                                </div>
+                                <small class="text-muted">Thank you for reducing food waste and helping your community!</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <form th:action="@{'/donor/offers/' + ${offer.id} + '/uncollect'}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-warning"
+                                    onclick="return confirm('Mark this offer as uncollected? It will become visible to receivers again.')">
+                                <i class="fas fa-undo me-1"></i>Mark as Uncollected
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deleted Banner -->
+            <div th:if="${offer.status.name() == 'DELETED'}" class="alert alert-secondary mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-trash-alt fa-2x text-muted me-3"></i>
+                            <div>
+                                <h6 class="mb-1"><strong>This offer has been deleted</strong></h6>
+                                <small class="text-muted">This offer is not visible to receivers and won't appear in public listings.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <form th:action="@{'/donor/offers/' + ${offer.id} + '/restore'}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="fas fa-undo me-1"></i>Restore Offer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expired Banner -->
+            <div th:if="${offer.status.name() == 'EXPIRED'}" class="alert alert-warning mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+                    <div>
+                        <h6 class="mb-1"><strong>This offer has expired</strong></h6>
+                        <small>The pickup time for this food offer has passed. You can edit it to extend the time if the food is still available.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Left Column - Main Content -->
+                <div class="col-lg-8">
+                    <!-- Food Images Gallery -->
+                    <div th:if="${images != null && !images.isEmpty()}" class="mb-5">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-images me-2"></i>Food Photos
+                        </h5>
+
+                        <!-- Main Image Display -->
+                        <div class="text-center mb-3">
+                            <img id="mainImage" th:src="@{'/images/' + ${offer.id} + '/' + ${images[0].fileName}}"
+                                 class="img-fluid rounded shadow-lg"
+                                 style="max-height: 450px; cursor: pointer; transition: transform 0.2s;"
+                                 alt="Food Image" onclick="openLightbox(this.src)"
+                                 onmouseover="this.style.transform='scale(1.02)'"
+                                 onmouseout="this.style.transform='scale(1)'">
+                        </div>
+
+                        <!-- Thumbnail Gallery -->
+                        <div th:if="${images.size() > 1}" class="row g-2">
+                            <div th:each="image, iterStat : ${images}" class="col-6 col-md-3">
+                                <div class="position-relative">
+                                    <img th:src="@{'/images/' + ${offer.id} + '/' + ${image.fileName}}"
+                                         class="img-thumbnail cursor-pointer"
+                                         style="height: 120px; width: 100%; object-fit: cover; transition: all 0.2s;"
+                                         th:alt="'Food image ' + ${iterStat.count}"
+                                         onclick="changeMainImage(this.src)"
+                                         onmouseover="this.style.transform='scale(1.05)'"
+                                         onmouseout="this.style.transform='scale(1)'">
+                                    <!-- Image actions overlay -->
+                                    <div class="position-absolute top-0 end-0 m-1">
+                                        <button class="btn btn-sm btn-danger" onclick="deleteImage(${image.id})"
+                                                th:if="${offer.status.name() != 'COLLECTED'}" title="Delete Image">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Images Section -->
+                    <div th:if="${images == null or images.isEmpty()}" class="mb-5">
+                        <div class="text-center p-5 bg-light rounded">
+                            <i class="fas fa-camera fa-4x text-muted mb-3"></i>
+                            <h6 class="text-muted">No photos uploaded</h6>
+                            <p class="text-muted small mb-3">Adding photos makes your offer more attractive to receivers!</p>
+                            <a th:href="@{'/donor/offers/' + ${offer.id} + '/edit'}"
+                               class="btn btn-primary"
+                               th:if="${offer.status.name() != 'COLLECTED'}">
+                                <i class="fas fa-plus me-1"></i>Add Photos
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Description Section -->
+                    <div class="mb-5">
+                        <h5 class="text-primary border-bottom pb-2 mb-3">
+                            <i class="fas fa-align-left me-2"></i>Description
+                        </h5>
+                        <div class="p-3 bg-light rounded">
+                            <p th:text="${offer.description}" class="mb-0 text-muted lead">Food description goes here...</p>
+                        </div>
+                    </div>
+
+                    <!-- Details Grid -->
+                    <div class="mb-5">
+                        <h5 class="text-primary border-bottom pb-2 mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Offer Details
+                        </h5>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-balance-scale fa-2x text-primary mb-2"></i>
+                                        <h6 class="text-primary mb-2">Quantity</h6>
+                                        <p th:text="${offer.quantity}" class="mb-0 fw-bold">Quantity info</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-map-marker-alt fa-2x text-primary mb-2"></i>
+                                        <h6 class="text-primary mb-2">Pickup Location</h6>
+                                        <p th:text="${offer.pickupLocation}" class="mb-0 fw-bold">Location</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
+                                        <h6 class="text-success mb-2">Available From</h6>
+                                        <p th:text="${#temporals.format(offer.availableFrom, 'MMM dd, yyyy')}" class="mb-0 fw-bold">Date</p>
+                                        <small th:text="${#temporals.format(offer.availableFrom, 'HH:mm')}" class="text-muted">Time</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-calendar-times fa-2x text-warning mb-2"></i>
+                                        <h6 class="text-warning mb-2">Best Before</h6>
+                                        <p th:text="${#temporals.format(offer.expiryAt, 'MMM dd, yyyy')}" class="mb-0 fw-bold">Date</p>
+                                        <small th:text="${#temporals.format(offer.expiryAt, 'HH:mm')}" class="text-muted">Time</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tags Section -->
+                    <div th:if="${offer.tags != null && !offer.tags.isEmpty()}" class="mb-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-tags me-2"></i>Dietary Tags
+                        </h6>
+                        <div>
+                                <span th:each="tag : ${offer.tags.split(',')}"
+                                      class="badge bg-secondary me-2 mb-2 px-3 py-2"
+                                      style="font-size: 0.9rem;"
+                                      th:text="${tag.trim()}">Tag</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Actions Card -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cogs me-2"></i>Manage Your Offer
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <!-- Active Offer Actions -->
+                            <div th:if="${offer.status.name() == 'ACTIVE'}" class="text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-eye fa-2x text-success mb-2"></i>
+                                    <p class="small text-muted mb-0">Your offer is live and visible to receivers</p>
+                                </div>
+
+                                <a th:href="@{'/donor/offers/' + ${offer.id} + '/edit'}"
+                                   class="btn btn-warning w-100 mb-2">
+                                    <i class="fas fa-edit me-1"></i>Edit Offer
+                                </a>
+
+                                <button type="button" class="btn btn-danger w-100 mb-2" onclick="confirmDelete()">
+                                    <i class="fas fa-trash me-1"></i>Delete Offer
+                                </button>
+                            </div>
+
+                            <!-- Collected Offer Actions -->
+                            <div th:if="${offer.status.name() == 'COLLECTED'}" class="text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                    <p class="small text-muted mb-0">Your food helped someone in need!</p>
+                                </div>
+
+                                <form th:action="@{'/donor/offers/' + ${offer.id} + '/uncollect'}" method="post">
+                                    <button type="submit" class="btn btn-outline-warning w-100 mb-2"
+                                            onclick="return confirm('Make this offer available again?')">
+                                        <i class="fas fa-undo me-1"></i>Mark as Uncollected
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Deleted Offer Actions -->
+                            <div th:if="${offer.status.name() == 'DELETED'}" class="text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-eye-slash fa-2x text-muted mb-2"></i>
+                                    <p class="small text-muted mb-0">This offer is hidden from receivers</p>
+                                </div>
+
+                                <form th:action="@{'/donor/offers/' + ${offer.id} + '/restore'}" method="post">
+                                    <button type="submit" class="btn btn-success w-100 mb-2">
+                                        <i class="fas fa-undo me-1"></i>Restore Offer
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Expired Offer Actions -->
+                            <div th:if="${offer.status.name() == 'EXPIRED'}" class="text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                    <p class="small text-muted mb-0">This offer has passed its pickup time</p>
+                                </div>
+
+                                <a th:href="@{'/donor/offers/' + ${offer.id} + '/edit'}"
+                                   class="btn btn-warning w-100 mb-2">
+                                    <i class="fas fa-edit me-1"></i>Update Times
+                                </a>
+
+                                <button type="button" class="btn btn-outline-danger w-100" onclick="confirmDelete()">
+                                    <i class="fas fa-trash me-1"></i>Delete Offer
+                                </button>
+                            </div>
+
+                            <!-- Hidden Delete Form -->
+                            <form id="deleteForm" th:action="@{'/donor/offers/' + ${offer.id} + '/delete'}"
+                                  method="post" style="display: none;">
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Card -->
+                    <div class="card border-0 bg-info text-white mb-4">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">
+                                <i class="fas fa-chart-bar me-2"></i>Offer Stats
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="border-end border-light">
+                                        <h4 class="mb-0">--</h4>
+                                        <small>Views</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="mb-0" th:text="${images != null ? images.size() : 0}">0</h4>
+                                    <small>Photos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips Card -->
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary">
+                                <i class="fas fa-lightbulb me-2"></i>Donation Tips
+                            </h6>
+                            <ul class="small mb-0 ps-3">
+                                <li>Respond quickly to pickup requests</li>
+                                <li>Be clear about pickup times</li>
+                                <li>Provide accurate food descriptions</li>
+                                <li>Update if plans change</li>
+                                <li>Share your positive impact!</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-trash-alt fa-4x text-danger mb-4"></i>
+                    <h5 class="mb-3">Delete this food offer?</h5>
+                    <p class="text-muted mb-4">
+                        This will remove your offer from public view. Receivers won't be able to see or request this food.
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> You can restore deleted offers later if needed.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary me-3" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Keep Offer
+                </button>
+                <button type="button" class="btn btn-danger" onclick="executeDelete()">
+                    <i class="fas fa-trash me-1"></i>Yes, Delete It
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Lightbox Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-image me-2"></i>Food Photo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="modalImage" src="" class="img-fluid" alt="Food Image" style="max-height: 80vh;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- JavaScript -->
+<script>
+    // Image gallery functions
+    function changeMainImage(src) {
+        const mainImage = document.getElementById('mainImage');
+        mainImage.src = src;
+    }
+
+    function openLightbox(src) {
+        document.getElementById('modalImage').src = src;
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        modal.show();
+    }
+
+    // Delete confirmation functions
+    function confirmDelete() {
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+
+    function executeDelete() {
+        // Show loading state
+        const deleteBtn = document.querySelector('#deleteModal .btn-danger');
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin
