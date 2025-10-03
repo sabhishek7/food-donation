@@ -232,27 +232,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ***
 
 **Made with ❤️ to reduce food waste and help communities in need**
-<span style="display:none">[^1][^10][^2][^3][^4][^5][^6][^7][^8][^9]</span>
-
-<div style="text-align: center">⁂</div>
-
-[^1]: https://github.com/adiimated/Foodo
-
-[^2]: https://github.com/aayush301/Food-Aid
-
-[^3]: https://zenodo.org/records/15582897
-
-[^4]: https://www.jotform.com/app-templates/food-donation-app
-
-[^5]: https://www.ijprems.com/uploadedfiles/paper/issue_4_april_2025/40131/final/fin_ijprems1745050416.pdf
-
-[^6]: https://www.studocu.com/in/document/university-of-mumbai/bsc-information-technology/waste-food-donation-2/32579044
-
-[^7]: https://www.slideshare.net/slideshow/food-donation-project-report-ii/249974874
-
-[^8]: https://www.figma.com/community/file/1396816875531251907/food-donation-app
-
-[^9]: https://www.academia.edu/95144981/Food_Donation_Application_Software_Development_Life_Cycle_Case_Study
-
-[^10]: https://www.scribd.com/presentation/867876667/Waste-Food-Management-Donation-Application
 
