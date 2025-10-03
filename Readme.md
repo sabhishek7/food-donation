@@ -1,5 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" style="height:64px;margin-right:32px"/>
-
 # Food Donation Application
 
 A comprehensive web application built with Spring Boot that connects food donors with receivers to reduce food waste and help communities in need. The platform enables restaurants, individuals, and organizations to donate surplus food while allowing NGOs and individuals to find available food donations in their area.
