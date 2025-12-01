@@ -211,25 +211,5 @@ src/main/resources/
 - [ ] Multi-language support
 
 
-## Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/yourusername/food-donation-app/issues) page
-2. Create a new issue with detailed description
-3. Contact the development team
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Spring Boot community for excellent documentation
-- Bootstrap team for responsive UI components
-- Contributors and testers who helped improve the application
-
-***
-
-**Made with ❤️ to reduce food waste and help communities in need**
+:
 
